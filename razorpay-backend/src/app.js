@@ -13,9 +13,16 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+const {
+  RAZORPAY_KEY_ID,
+  RAZORPAY_KEY_SECRET,
+  CRYPTO_SECRET,
+  PORT = 1337,
+} = process.env;
+
 var razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
+  key_id: RAZORPAY_KEY_ID,
+  key_secret: RAZORPAY_KEY_SECRET,
 });
 
 app.get("/logo.svg", (req, res) => {
@@ -23,18 +30,18 @@ app.get("/logo.svg", (req, res) => {
 });
 
 app.post("/verification", (req, res) => {
-  const secret = "razorpaysecret";
+  console.log("/verification");
 
-  console.log(req.body);
+  // console.log(req.body);
 
-  const shasum = crypto.createHmac("sha256", secret);
+  const shasum = crypto.createHmac("sha256", CRYPTO_SECRET);
   shasum.update(JSON.stringify(req.body));
   const digest = shasum.digest("hex");
 
-  console.log(digest, req.headers["x-razorpay-signature"]);
+  // console.log(digest, req.headers["x-razorpay-signature"]);
 
   if (digest === req.headers["x-razorpay-signature"]) {
-    console.log("request is legit");
+    // console.log("request is legit");
     res.status(200).json({
       message: "OK",
     });
@@ -44,8 +51,10 @@ app.post("/verification", (req, res) => {
 });
 
 app.post("/razorpay", async (req, res) => {
+  console.log("---------------------------------------------");
+  console.log("/razorpay");
   const payment_capture = 1;
-  const amount = 500;
+  const amount = 200;
   const currency = "INR";
 
   const options = {
@@ -57,18 +66,16 @@ app.post("/razorpay", async (req, res) => {
 
   try {
     const response = await razorpay.orders.create(options);
-    console.log(response);
+    console.log({ response });
     res.status(200).json({
       id: response.id,
       currency: response.currency,
       amount: response.amount,
     });
   } catch (err) {
-    console.log(err);
+    console.log({ err });
   }
 });
-
-const PORT = process.env.PORT || 1337;
 
 app.listen(PORT, () => {
   console.log(`Listening on ${PORT}`);

@@ -34,7 +34,7 @@ function App() {
     console.log(data);
 
     const options = {
-      key: "rzp_test_0tpemkHKm5K1Bc",
+      key: "rzp_test_OBmfYSYFF2XIZJ",
       currency: data.currency,
       amount: data.amount.toString(),
       order_id: data.id,
